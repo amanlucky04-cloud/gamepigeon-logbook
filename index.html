@@ -445,7 +445,7 @@
       for (let i=0; i<6; i++){
         html += `
           <div class="gameCard">
-            <div class="gameTitle">${escapeHtml((i+1) + ". " + labels[i] + (i===5 ? "" : " — " + GAME_ORDER[i]))}</div>
+            <div class="gameTitle">${escapeHtml((i+1) + ". " + GAME_ORDER[i])}</div>
             <label>Winner</label>
             <select data-game="${i}">
               <option value="">— Select —</option>
@@ -699,3 +699,4 @@
   </script>
 </body>
 </html>
+
