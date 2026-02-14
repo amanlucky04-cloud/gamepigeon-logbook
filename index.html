@@ -383,21 +383,23 @@
     }
 
     async function postEntryToSheet(entry){
-      const payload = {
-        key: SHEETS_KEY,
-        ...entry,
-        playerA: state.names.a,
-        playerB: state.names.b
-      };
+  const payload = {
+    key: SHEETS_KEY,
+    ...entry,
+    playerA: state.names.a,
+    playerB: state.names.b
+  };
 
-      const res = await fetch(SHEETS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "Failed to save");
-    }
+  const res = await fetch(SHEETS_API_URL, {
+    method: "POST",
+    // IMPORTANT: use text/plain to avoid CORS preflight
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Failed to save");
+}
 
     // "Delete" is implemented as a tombstone entry (no need to edit rows in Sheets):
     // We write a special entry with same id and _deleted:true, and the client filters it out.
@@ -772,4 +774,5 @@
   </script>
 </body>
 </html>
+
 
