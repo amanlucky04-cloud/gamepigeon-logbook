@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GamePigeon Series Logbook</title>
+  <style>
+    :root{
+      --bg:#0b0f19; --card:#121a2a; --muted:#93a4c7; --text:#e9efff;
+      --accent:#6ea8ff; --accent2:#7dffb2; --danger:#ff6e6e; --border:#24304a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg, #070a12 0%, #0b0f19 100%);
+      color:var(--text);
+    }
+    header{
+      padding:28px 18px 16px;
+      max-width:1100px; margin:0 auto;
+    }
+    h1{margin:0 0 8px; font-size:22px; letter-spacing:.2px}
+    p{margin:0; color:var(--muted); line-height:1.35}
+    main{max-width:1100px; margin:0 auto; padding:14px 18px 40px}
+    .grid{
+      display:grid; gap:14px;
+      grid-template-columns: 1.1fr 1.4fr;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .card{
+      background:rgba(18,26,42,.92);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    input[type="text"], input[type="number"], input[type="date"], select{
+      width:100%;
+      background:#0c1324;
+      border:1px solid #22304c;
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+    }
+    input[type="number"]{appearance:textfield}
+    .field{flex:1; min-width:210px}
+    .field.small{min-width:160px; flex:0 0 160px}
+    .field.tiny{min-width:120px; flex:0 0 120px}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      background:#0c1324; border:1px solid #22304c;
+      color:var(--muted); font-size:12px;
+    }
+    .score{
+      font-size:34px; font-weight:800; letter-spacing:.4px;
+      margin:6px 0 8px;
+    }
+    .sub{color:var(--muted); font-size:12px}
+    .divider{height:1px; background:var(--border); margin:14px 0}
+    button{
+      border:0; cursor:pointer;
+      padding:10px 12px; border-radius:12px;
+      font-weight:700;
+      background:var(--accent); color:#08122a;
+    }
+    button.secondary{
+      background:#1b2a46; color:var(--text);
+      border:1px solid #2a3a5c;
+    }
+    button.danger{
+      background:transparent; color:var(--danger);
+      border:1px solid rgba(255,110,110,.45);
+    }
+    button:disabled{opacity:.55; cursor:not-allowed}
+    .games{
+      display:grid; gap:10px;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width:700px){ .games{grid-template-columns:1fr} }
+    .gameCard{
+      border:1px solid #22304c;
+      background:#0c1324;
+      padding:12px;
+      border-radius:14px;
+    }
+    .gameTitle{font-weight:800; margin:0 0 8px}
+    .hint{color:var(--muted); font-size:12px}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--border);
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      font-size:13px;
+    }
+    th{color:var(--muted); text-align:left; background:#0c1324; font-weight:700}
+    tr:last-child td{border-bottom:0}
+    .tag{
+      display:inline-block; padding:3px 8px;
+      border-radius:999px; font-size:12px;
+      border:1px solid #2a3a5c; color:var(--muted);
+    }
+    .tag.win{border-color:rgba(125,255,178,.45); color:var(--accent2)}
+    .tag.loss{border-color:rgba(255,110,110,.45); color:var(--danger)}
+    .tag.tie{border-color:rgba(110,168,255,.45); color:var(--accent)}
+    .mono{font-variant-numeric:tabular-nums; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .topActions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .note{
+      margin-top:10px; color:var(--muted); font-size:12px; line-height:1.35
+    }
+    textarea{
+      width:100%;
+      min-height:110px;
+      background:#0c1324;
+      border:1px solid #22304c;
+      color:var(--text);
+      padding:10px;
+      border-radius:12px;
+      outline:none;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GamePigeon Series Logbook</h1>
+    <p>Track a head-to-head series: Basketball → Pool → Cup Pong → Archery → Cup Pong (again) → <span class="mono">if 3–3 tie</span>, Golf tiebreaker.</p>
+  </header>
+
+  <main class="grid">
+    <!-- LEFT: Settings + All-time -->
+    <section class="card" id="settingsCard">
+      <div class="row">
+        <div class="field">
+          <label>Your name</label>
+          <input id="nameA" type="text" placeholder="You" />
+        </div>
+        <div class="field">
+          <label>Opponent name</label>
+          <input id="nameB" type="text" placeholder="Him" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row" style="align-items:flex-end">
+        <div class="field small">
+          <label>Starting all-time wins (you)</label>
+          <input id="baseWinsA" type="number" min="0" step="1" />
+        </div>
+        <div class="field small">
+          <label>Starting all-time wins (opponent)</label>
+          <input id="baseWinsB" type="number" min="0" step="1" />
+        </div>
+        <div class="field">
+          <span class="pill" id="seriesRulePill">Series rule: Golf only if 3–3 after 6 games</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <div class="sub">All-time series record</div>
+        <div class="score mono" id="allTimeScore">36–33</div>
+        <div class="sub" id="allTimeDetail">Includes your logged series + the starting record.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="topActions">
+        <button class="secondary" id="exportBtn">Export JSON</button>
+        <button class="secondary" id="importBtn">Import JSON</button>
+        <button class="danger" id="resetBtn">Reset log</button>
+      </div>
+
+      <div class="note">
+        Data is saved in your browser (LocalStorage). Export if you want a backup or to move it to another device.
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="importArea" style="display:none">
+        <label>Paste JSON here, then click “Load JSON”</label>
+        <textarea id="importText" spellcheck="false"></textarea>
+        <div class="row" style="margin-top:10px">
+          <button id="loadJsonBtn">Load JSON</button>
+          <button class="secondary" id="cancelImportBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div id="exportArea" style="display:none">
+        <label>Copy your JSON backup</label>
+        <textarea id="exportText" readonly></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="secondary" id="closeExportBtn">Close</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Add series + Log -->
+    <section class="card">
+      <h2 style="margin:0 0 10px; font-size:16px">Add a series</h2>
+
+      <div class="row">
+        <div class="field tiny">
+          <label>Date</label>
+          <input id="seriesDate" type="date" />
+        </div>
+        <div class="field">
+          <label>Quick status</label>
+          <div class="pill" id="liveStatus">Pick winners for games below.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="games" id="gamesGrid"></div>
+
+      <div class="divider"></div>
+
+      <div class="row" style="align-items:center; justify-content:space-between">
+        <div>
+          <div class="sub">Series score (games)</div>
+          <div class="mono" style="font-size:20px; font-weight:800" id="seriesScore">0–0</div>
+          <div class="hint" id="seriesHint">Golf appears only if the first 6 games end 3–3.</div>
+        </div>
+        <div class="row">
+          <button class="secondary" id="clearFormBtn">Clear</button>
+          <button id="saveSeriesBtn" disabled>Save series</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 style="margin:0 0 10px; font-size:16px">Logbook</h2>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:110px">Date</th>
+              <th>Result</th>
+              <th style="min-width:260px">Games (in order)</th>
+              <th style="width:90px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logBody">
+            <tr><td colspan="4" class="hint">No entries yet. Add your first series above.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ---------- Config ----------
+    const STORAGE_KEY = "gp_series_logbook_v1";
+
+    const GAME_ORDER = [
+      "Basketball",
+      "Pool",
+      "Cup Pong",
+      "Archery",
+      "Cup Pong (again)",
+      "Game 6 (choose winner)" // placeholder label; still counted as game 6
+    ];
+    const TIEBREAKER = "Golf (tiebreaker)";
+
+    // ---------- State ----------
+    const defaultState = {
+      names: { a: "You", b: "Him" },
+      base: { a: 36, b: 33 },
+      entries: [] // each: {id, date, winners: [ 'a'|'b', ...], tiebreaker?: 'a'|'b' }
+    };
+
+    let state = loadState();
+
+    // ---------- Helpers ----------
+    function uid(){
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+    function clampInt(n){
+      n = Number(n);
+      if (!Number.isFinite(n) || n < 0) return 0;
+      return Math.floor(n);
+    }
+    function fmtDate(iso){
+      if (!iso) return "";
+      // show as YYYY-MM-DD (keeps simple, avoids timezone weirdness)
+      return iso;
+    }
+    function winnerName(w){
+      if (w === "a") return state.names.a;
+      if (w === "b") return state.names.b;
+      return "—";
+    }
+    function gameBadge(w){
+      if (w === "a") return `<span class="tag win">${escapeHtml(state.names.a)}</span>`;
+      if (w === "b") return `<span class="tag loss">${escapeHtml(state.names.b)}</span>`;
+      return `<span class="tag tie">—</span>`;
+    }
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
+        const parsed = JSON.parse(raw);
+        // basic merge with defaults
+        const merged = structuredClone(defaultState);
+        if (parsed?.names?.a) merged.names.a = String(parsed.names.a);
+        if (parsed?.names?.b) merged.names.b = String(parsed.names.b);
+        if (parsed?.base){
+          merged.base.a = clampInt(parsed.base.a);
+          merged.base.b = clampInt(parsed.base.b);
+        }
+        if (Array.isArray(parsed?.entries)) merged.entries = parsed.entries;
+        return merged;
+      }catch{
+        return structuredClone(defaultState);
+      }
+    }
+    function saveState(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // Compute series winner from winners array (first 6 games), and optional golf tiebreaker
+    function computeSeriesOutcome(winnersFirst6, golfWinner){
+      const aWins = winnersFirst6.filter(x => x === "a").length;
+      const bWins = winnersFirst6.filter(x => x === "b").length;
+
+      // If someone already has more wins after 6 games (normally should be 4–2 / 5–1 / 6–0), they win.
+      if (aWins > bWins) return { winner: "a", games: { a: aWins, b: bWins }, needsGolf: false };
+      if (bWins > aWins) return { winner: "b", games: { a: aWins, b: bWins }, needsGolf: false };
+
+      // tie after 6 games => needs golf
+      const needsGolf = (aWins === 3 && bWins === 3);
+      if (needsGolf){
+        if (golfWinner === "a" || golfWinner === "b"){
+          return { winner: golfWinner, games: { a: aWins, b: bWins }, needsGolf: true };
+        }
+        return { winner: null, games: { a: aWins, b: bWins }, needsGolf: true };
+      }
+
+      // Any other tie case would mean missing picks; treat as incomplete
+      return { winner: null, games: { a: aWins, b: bWins }, needsGolf: false };
+    }
+
+    function computeAllTime(){
+      let a = clampInt(state.base.a);
+      let b = clampInt(state.base.b);
+      for (const e of state.entries){
+        if (e.seriesWinner === "a") a += 1;
+        else if (e.seriesWinner === "b") b += 1;
+      }
+      return { a, b };
+    }
+
+    // ---------- UI Wiring ----------
+    const el = (id) => document.getElementById(id);
+
+    const nameA = el("nameA");
+    const nameB = el("nameB");
+    const baseWinsA = el("baseWinsA");
+    const baseWinsB = el("baseWinsB");
+
+    const allTimeScore = el("allTimeScore");
+    const allTimeDetail = el("allTimeDetail");
+
+    const seriesDate = el("seriesDate");
+    const gamesGrid = el("gamesGrid");
+    const seriesScore = el("seriesScore");
+    const liveStatus = el("liveStatus");
+    const saveSeriesBtn = el("saveSeriesBtn");
+    const clearFormBtn = el("clearFormBtn");
+
+    const logBody = el("logBody");
+
+    const exportBtn = el("exportBtn");
+    const importBtn = el("importBtn");
+    const resetBtn = el("resetBtn");
+    const importArea = el("importArea");
+    const exportArea = el("exportArea");
+    const importText = el("importText");
+    const exportText = el("exportText");
+    const loadJsonBtn = el("loadJsonBtn");
+    const cancelImportBtn = el("cancelImportBtn");
+    const closeExportBtn = el("closeExportBtn");
+
+    // Form state
+    let formWinners = Array(6).fill(""); // 'a'/'b'/''
+    let formGolf = ""; // 'a'/'b'/''
+    let golfVisible = false;
+
+    function setTodayIfEmpty(){
+      if (!seriesDate.value){
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const dd = String(d.getDate()).padStart(2,"0");
+        seriesDate.value = `${yyyy}-${mm}-${dd}`;
+      }
+    }
+
+    function render(){
+      // Names + base
+      nameA.value = state.names.a;
+      nameB.value = state.names.b;
+      baseWinsA.value = state.base.a;
+      baseWinsB.value = state.base.b;
+
+      // All time
+      const totals = computeAllTime();
+      allTimeScore.textContent = `${totals.a}–${totals.b}`;
+      allTimeDetail.textContent = `Starting record + ${state.entries.length} logged series.`;
+
+      // Games form
+      renderGamesForm();
+      renderSeriesPreview();
+
+      // Logbook
+      renderLog();
+    }
+
+    function renderGamesForm(){
+      const aName = state.names.a;
+      const bName = state.names.b;
+
+      const labels = [...GAME_ORDER];
+      // Replace placeholder game 6 label with something clearer
+      labels[5] = "Game 6";
+
+      let html = "";
+      for (let i=0; i<6; i++){
+        html += `
+          <div class="gameCard">
+            <div class="gameTitle">${escapeHtml((i+1) + ". " + labels[i] + (i===5 ? "" : " — " + GAME_ORDER[i]))}</div>
+            <label>Winner</label>
+            <select data-game="${i}">
+              <option value="">— Select —</option>
+              <option value="a">${escapeHtml(aName)}</option>
+              <option value="b">${escapeHtml(bName)}</option>
+            </select>
+            <div class="hint" style="margin-top:8px">
+              ${escapeHtml(i===5 ? "This is the 6th game to complete the 6-game slate." : "Game in the official order.")}
+            </div>
+          </div>
+        `;
+      }
+
+      // Golf (conditional)
+      html += `
+        <div class="gameCard" id="golfCard" style="display:${golfVisible ? "block":"none"}">
+          <div class="gameTitle">${escapeHtml("7. " + TIEBREAKER)}</div>
+          <label>Winner (tiebreaker)</label>
+          <select id="golfSelect">
+            <option value="">— Select —</option>
+            <option value="a">${escapeHtml(aName)}</option>
+            <option value="b">${escapeHtml(bName)}</option>
+          </select>
+          <div class="hint" style="margin-top:8px">
+            Only required if the first 6 games end 3–3.
+          </div>
+        </div>
+      `;
+
+      gamesGrid.innerHTML = html;
+
+      // Set select values + listeners
+      gamesGrid.querySelectorAll("select[data-game]").forEach(sel => {
+        const idx = Number(sel.getAttribute("data-game"));
+        sel.value = formWinners[idx] || "";
+        sel.addEventListener("change", () => {
+          formWinners[idx] = sel.value;
+          updateGolfVisibility();
+          renderSeriesPreview();
+        });
+      });
+
+      const golfSel = el("golfSelect");
+      if (golfSel){
+        golfSel.value = formGolf || "";
+        golfSel.addEventListener("change", () => {
+          formGolf = golfSel.value;
+          renderSeriesPreview();
+        });
+      }
+    }
+
+    function updateGolfVisibility(){
+      const picked = formWinners.filter(Boolean).length;
+      // Only show golf when all 6 picked and it is exactly 3–3
+      if (picked === 6){
+        const aWins = formWinners.filter(x => x==="a").length;
+        const bWins = formWinners.filter(x => x==="b").length;
+        golfVisible = (aWins === 3 && bWins === 3);
+        if (!golfVisible) formGolf = "";
+      } else {
+        golfVisible = false;
+        formGolf = "";
+      }
+      const golfCard = el("golfCard");
+      if (golfCard) golfCard.style.display = golfVisible ? "block" : "none";
+    }
+
+    function renderSeriesPreview(){
+      const a = formWinners.filter(x => x==="a").length;
+      const b = formWinners.filter(x => x==="b").length;
+      seriesScore.textContent = `${a}–${b}`;
+
+      const picked = formWinners.filter(Boolean).length;
+      const outcome = computeSeriesOutcome(formWinners, formGolf);
+
+      // Status message
+      if (picked < 6){
+        liveStatus.textContent = `Picked ${picked}/6 games.`;
+      } else if (outcome.needsGolf && !formGolf){
+        liveStatus.textContent = `Series tied 3–3. Pick Golf to decide it.`;
+      } else if (outcome.winner){
+        liveStatus.textContent = `Series winner: ${winnerName(outcome.winner)}${outcome.needsGolf ? " (via Golf)" : ""}.`;
+      } else {
+        liveStatus.textContent = `Complete the picks to save.`;
+      }
+
+      // Save button enabled only when:
+      // - date present
+      // - 6 games selected
+      // - if 3-3 then golf selected
+      const dateOk = Boolean(seriesDate.value);
+      const sixOk = (picked === 6);
+      const golfOk = (!golfVisible) || (formGolf === "a" || formGolf === "b");
+      const canSave = dateOk && sixOk && golfOk && Boolean(outcome.winner);
+      saveSeriesBtn.disabled = !canSave;
+    }
+
+    function renderLog(){
+      if (!state.entries.length){
+        logBody.innerHTML = `<tr><td colspan="4" class="hint">No entries yet. Add your first series above.</td></tr>`;
+        return;
+      }
+
+      // Sort by date desc (ISO strings)
+      const sorted = [...state.entries].sort((x,y) => (y.date || "").localeCompare(x.date || ""));
+
+      const aName = state.names.a, bName = state.names.b;
+
+      logBody.innerHTML = sorted.map(e => {
+        const resultTag =
+          e.seriesWinner === "a"
+            ? `<span class="tag win">${escapeHtml(aName)} W</span>`
+            : e.seriesWinner === "b"
+              ? `<span class="tag loss">${escapeHtml(bName)} W</span>`
+              : `<span class="tag tie">Incomplete</span>`;
+
+        const games = (e.winners || []).map((w, i) => {
+          const gameName = GAME_ORDER[i] === "Game 6 (choose winner)" ? "Game 6" : GAME_ORDER[i];
+          return `${escapeHtml(gameName)}: ${escapeHtml(winnerName(w))}`;
+        }).join("<br>");
+
+        const golfLine = e.golfWinner ? `<br><b>${escapeHtml(TIEBREAKER)}:</b> ${escapeHtml(winnerName(e.golfWinner))}` : "";
+
+        const notes = e.seriesNote ? `<br><span class="hint">${escapeHtml(e.seriesNote)}</span>` : "";
+
+        return `
+          <tr>
+            <td class="mono">${escapeHtml(fmtDate(e.date))}</td>
+            <td>${resultTag}<div class="hint">Games: <span class="mono">${e.gameScoreA ?? "?"}–${e.gameScoreB ?? "?"}</span>${e.golfWinner ? " + Golf" : ""}</div></td>
+            <td>${games}${golfLine}${notes}</td>
+            <td><button class="danger" data-del="${escapeHtml(e.id)}">Delete</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      logBody.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-del");
+          state.entries = state.entries.filter(e => e.id !== id);
+          saveState();
+          render();
+        });
+      });
+    }
+
+    function clearForm(){
+      formWinners = Array(6).fill("");
+      formGolf = "";
+      golfVisible = false;
+      setTodayIfEmpty();
+      render();
+    }
+
+    // ---------- Events ----------
+    nameA.addEventListener("input", () => {
+      state.names.a = nameA.value.trim() || "You";
+      saveState();
+      render();
+    });
+    nameB.addEventListener("input", () => {
+      state.names.b = nameB.value.trim() || "Him";
+      saveState();
+      render();
+    });
+
+    baseWinsA.addEventListener("input", () => {
+      state.base.a = clampInt(baseWinsA.value);
+      saveState();
+      render();
+    });
+    baseWinsB.addEventListener("input", () => {
+      state.base.b = clampInt(baseWinsB.value);
+      saveState();
+      render();
+    });
+
+    seriesDate.addEventListener("change", renderSeriesPreview);
+
+    clearFormBtn.addEventListener("click", clearForm);
+
+    saveSeriesBtn.addEventListener("click", () => {
+      const outcome = computeSeriesOutcome(formWinners, formGolf);
+      if (!outcome.winner) return;
+
+      const entry = {
+        id: uid(),
+        date: seriesDate.value,
+        winners: [...formWinners],
+        golfWinner: golfVisible ? formGolf : "",
+        seriesWinner: outcome.winner,
+        gameScoreA: outcome.games.a,
+        gameScoreB: outcome.games.b,
+        createdAt: Date.now()
+      };
+
+      state.entries.push(entry);
+      saveState();
+      clearForm();
+    });
+
+    // Export/Import/Reset
+    exportBtn.addEventListener("click", () => {
+      exportArea.style.display = "block";
+      importArea.style.display = "none";
+      exportText.value = JSON.stringify(state, null, 2);
+    });
+    closeExportBtn.addEventListener("click", () => {
+      exportArea.style.display = "none";
+    });
+
+    importBtn.addEventListener("click", () => {
+      importArea.style.display = "block";
+      exportArea.style.display = "none";
+      importText.value = "";
+    });
+    cancelImportBtn.addEventListener("click", () => {
+      importArea.style.display = "none";
+    });
+    loadJsonBtn.addEventListener("click", () => {
+      try{
+        const parsed = JSON.parse(importText.value);
+        // basic validation/merge
+        const merged = structuredClone(defaultState);
+        if (parsed?.names?.a) merged.names.a = String(parsed.names.a);
+        if (parsed?.names?.b) merged.names.b = String(parsed.names.b);
+        merged.base.a = clampInt(parsed?.base?.a);
+        merged.base.b = clampInt(parsed?.base?.b);
+        if (Array.isArray(parsed?.entries)) merged.entries = parsed.entries;
+        state = merged;
+        saveState();
+        importArea.style.display = "none";
+        render();
+      }catch(e){
+        alert("That JSON couldn’t be loaded. Make sure you pasted a valid export.");
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      const ok = confirm("Reset log entries? (This will NOT change the starting record unless you set it.)");
+      if (!ok) return;
+      state.entries = [];
+      saveState();
+      render();
+    });
+
+    // ---------- Init ----------
+    setTodayIfEmpty();
+    updateGolfVisibility();
+    render();
+  </script>
+</body>
+</html>
